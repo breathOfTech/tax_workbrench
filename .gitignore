@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment / secrets
+.env
+apps/tax-agent/settings.local.yaml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Tax sources (downloaded IRS/state PDFs, large)
+data/sources/
+data/source_cache/
+
+# User documents (uploaded W-2s, 1099s, etc.)
+data/uploads/
+
+# Generated reports and exports
+data/exports/
+
+# Embeddings / vector artifacts
+data/embeddings/
+
+# MongoDB local data (if running outside docker)
+mongo_data/
