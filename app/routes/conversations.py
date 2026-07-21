@@ -4,8 +4,8 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from tax_workbench.lib.graph_runtime import BaseConversationService
-from tax_workbench.models.conversation import Conversation
+from libs.graph_runtime import BaseConversationService
+from libs.models.conversation import Conversation
 
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])

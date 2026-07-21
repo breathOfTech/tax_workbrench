@@ -2,9 +2,9 @@
 
 from abc import ABC, abstractmethod
 
-from tax_workbench.db.connection import MongoManager
-from tax_workbench.db.database_service import DatabaseService
-from tax_workbench.models.conversation import (
+from libs.db.connection import MongoManager
+from libs.db.database_service import DatabaseService
+from libs.models.conversation import (
     Conversation,
     ConversationMessage,
     ConversationState,

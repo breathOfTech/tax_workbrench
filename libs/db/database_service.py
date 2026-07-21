@@ -9,8 +9,8 @@ from typing import Any
 
 from motor.motor_asyncio import AsyncIOMotorCollection
 
-from tax_workbench.db.base_document import BaseDocument
-from tax_workbench.db.connection import MongoManager
+from libs.db.base_document import BaseDocument
+from libs.db.connection import MongoManager
 
 
 class BaseDatabaseService(ABC):

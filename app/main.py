@@ -5,13 +5,13 @@ from pathlib import Path
 
 from fastapi import FastAPI
 
-from tax_workbench.config import load_settings
-from tax_workbench.db.connection import MongoManager
-from app.configuration import create_container
+from libs.config import load_settings
+from libs.db.connection import MongoManager
+from app.container import create_container
 from app.routes.conversations import router as conversations_router
 
 
-SETTINGS_PATH = Path(__file__).parent.parent / "settings.yaml"
+SETTINGS_PATH = Path(__file__).parent / "settings.yaml"
 
 
 @asynccontextmanager

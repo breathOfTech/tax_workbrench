@@ -6,7 +6,7 @@ Singleton — one client shared across all services via DI container.
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pydantic import BaseModel
 
-from tax_workbench.config import get_setting
+from libs.config import get_setting
 
 
 class DBSettings(BaseModel):

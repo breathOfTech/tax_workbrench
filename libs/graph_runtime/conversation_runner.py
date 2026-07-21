@@ -4,10 +4,9 @@ from abc import ABC, abstractmethod
 from typing import AsyncGenerator
 
 from langchain_core.messages import AIMessage, HumanMessage
-from langgraph.graph.state import CompiledStateGraph
 
-from tax_workbench.lib.graph_runtime.provider import BaseGraphProvider
-from tax_workbench.models.conversation import ConversationMessage, MessageRole
+from libs.graph_runtime.provider import BaseGraphProvider
+from libs.models.conversation import ConversationMessage, MessageRole
 
 
 class BaseConversationRunner(ABC):
@@ -83,6 +82,11 @@ class ConversationRunner(BaseConversationRunner):
         ):
             kind = event.get("event")
             if kind == "on_chat_model_stream":
+                # Skip router node events — only stream subagent responses
+                node = event.get("metadata", {}).get("langgraph_node", "")
+                if node == "router":
+                    continue
+
                 chunk = event.get("data", {}).get("chunk")
                 if chunk and hasattr(chunk, "content") and chunk.content:
                     content = chunk.content

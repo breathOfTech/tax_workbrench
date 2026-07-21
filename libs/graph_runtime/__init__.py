@@ -1,10 +1,10 @@
-from tax_workbench.lib.graph_runtime.provider import BaseGraphProvider, CachingGraphProvider
-from tax_workbench.lib.graph_runtime.model_factory import ModelFactory, ModelSettings
-from tax_workbench.lib.graph_runtime.conversation_service import (
+from libs.graph_runtime.provider import BaseGraphProvider, CachingGraphProvider
+from libs.graph_runtime.model_factory import ModelFactory, ModelSettings
+from libs.graph_runtime.conversation_service import (
     BaseConversationService,
     ConversationService,
 )
-from tax_workbench.lib.graph_runtime.conversation_runner import (
+from libs.graph_runtime.conversation_runner import (
     BaseConversationRunner,
     ConversationRunner,
 )

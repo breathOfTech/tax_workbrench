@@ -7,9 +7,9 @@ Routes stay thin, all business logic lives here.
 from abc import ABC, abstractmethod
 from typing import AsyncGenerator
 
-from tax_workbench.db.repositories.conversations import BaseConversationsRepository
-from tax_workbench.lib.graph_runtime.conversation_runner import BaseConversationRunner
-from tax_workbench.models.conversation import (
+from libs.db.repositories.conversations import BaseConversationsRepository
+from libs.graph_runtime.conversation_runner import BaseConversationRunner
+from libs.models.conversation import (
     Conversation,
     ConversationMessage,
     ConversationState,

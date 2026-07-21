@@ -3,7 +3,7 @@
 # Start services
 start:
 	docker compose up -d
-	cd apps/tax-agent && ../../.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+	.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 # Start only infrastructure (MongoDB, Redis)
 infra:

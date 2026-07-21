@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from tax_workbench.db.base_document import BaseDocument, _utcnow
+from libs.db.base_document import BaseDocument, _utcnow
 
 
 class MessageRole(StrEnum):

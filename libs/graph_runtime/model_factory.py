@@ -8,7 +8,7 @@ from langchain_aws import ChatBedrockConverse
 from langchain_core.language_models.chat_models import BaseChatModel
 from pydantic import BaseModel
 
-from tax_workbench.config import get_setting
+from libs.config import get_setting
 
 logger = logging.getLogger(__name__)
 

@@ -2,13 +2,13 @@
 
 from injector import Injector, Module, provider, singleton
 
-from app.graph import TaxAgentGraphProvider
-from tax_workbench.db.connection import MongoManager
-from tax_workbench.db.repositories.conversations import (
+from agents import SupervisorGraphProvider
+from libs.db.connection import MongoManager
+from libs.db.repositories.conversations import (
     BaseConversationsRepository,
     ConversationsRepository,
 )
-from tax_workbench.lib.graph_runtime import (
+from libs.graph_runtime import (
     BaseConversationRunner,
     BaseConversationService,
     BaseGraphProvider,
@@ -43,7 +43,7 @@ class AppModule(Module):
     @singleton
     @provider
     def provide_graph_provider(self, model_factory: ModelFactory) -> BaseGraphProvider:
-        return TaxAgentGraphProvider(model_factory)
+        return SupervisorGraphProvider(model_factory)
 
     @singleton
     @provider
