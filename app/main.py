@@ -1,5 +1,7 @@
 """Tax Agent — FastAPI application entry point."""
 
+import logging
+import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -14,9 +16,24 @@ from app.routes.conversations import router as conversations_router
 SETTINGS_PATH = Path(__file__).parent / "settings.yaml"
 
 
+def _configure_logging() -> None:
+    """Configure application logging — called after uvicorn has set up its own."""
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s %(levelname)s %(name)s — %(message)s", datefmt="%H:%M:%S")
+    )
+    for name in ("libs", "agents", "app"):
+        logger = logging.getLogger(name)
+        logger.setLevel(logging.INFO)
+        logger.addHandler(handler)
+        logger.propagate = False
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan — startup and shutdown."""
+    _configure_logging()
+
     # Startup
     load_settings(SETTINGS_PATH)
     container = create_container()

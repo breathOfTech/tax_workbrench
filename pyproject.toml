@@ -4,10 +4,11 @@ version = "0.1.0"
 description = "Agentic tax planning workspace for U.S. individual tax scenarios"
 requires-python = ">=3.12,<3.14"
 dependencies = [
-    # LangGraph / LangChain
-    "langgraph>=0.4",
+    # LangGraph / LangChain / Deep Agents
+    "langgraph>=1.2",
     "langchain-core>=0.3",
     "langchain-aws>=0.2",
+    "deepagents>=0.6",
 
     # API
     "fastapi>=0.115",

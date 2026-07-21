@@ -1,10 +1,20 @@
-"""Chainlit chat UI — streams responses from the supervisor graph."""
+"""Chainlit chat UI — streams responses from the deep agent graph."""
+
+import logging
 
 import chainlit as cl
+from langchain_core.messages import AIMessage, HumanMessage
 
-from agents import SupervisorGraphProvider
+from agents.deep_agent import DeepAgentProvider
 from libs.config import load_settings
 from libs.graph_runtime import ModelFactory
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s — %(message)s",
+    datefmt="%H:%M:%S",
+    force=True,
+)
 
 # Load settings and initialize
 load_settings("app/settings.yaml")
@@ -12,14 +22,12 @@ load_settings("app/settings.yaml")
 model_factory = ModelFactory()
 model_factory.initialize()
 
-graph_provider = SupervisorGraphProvider(model_factory)
+graph_provider = DeepAgentProvider(model_factory)
 
 
 @cl.on_message
 async def on_message(message: cl.Message):
     """Handle incoming user message — stream the agent response."""
-    from langchain_core.messages import AIMessage, HumanMessage
-
     graph = await graph_provider.get_graph()
 
     # Build message history from Chainlit session
@@ -35,10 +43,6 @@ async def on_message(message: cl.Message):
         {"messages": history}, version="v2"
     ):
         if event.get("event") == "on_chat_model_stream":
-            node = event.get("metadata", {}).get("langgraph_node", "")
-            if node == "router":
-                continue
-
             chunk = event.get("data", {}).get("chunk")
             if chunk and hasattr(chunk, "content") and chunk.content:
                 content = chunk.content

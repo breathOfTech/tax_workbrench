@@ -28,7 +28,7 @@ class BaseConversationRunner(ABC):
 
 
 class ConversationRunner(BaseConversationRunner):
-    """Runs the supervisor graph for a conversation turn.
+    """Runs the deep agent graph for a conversation turn.
 
     Supports both full invocation and streaming.
     """
@@ -82,11 +82,6 @@ class ConversationRunner(BaseConversationRunner):
         ):
             kind = event.get("event")
             if kind == "on_chat_model_stream":
-                # Skip router node events — only stream subagent responses
-                node = event.get("metadata", {}).get("langgraph_node", "")
-                if node == "router":
-                    continue
-
                 chunk = event.get("data", {}).get("chunk")
                 if chunk and hasattr(chunk, "content") and chunk.content:
                     content = chunk.content

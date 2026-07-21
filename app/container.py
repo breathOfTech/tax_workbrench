@@ -2,7 +2,7 @@
 
 from injector import Injector, Module, provider, singleton
 
-from agents import SupervisorGraphProvider
+from agents.deep_agent import DeepAgentProvider
 from libs.db.connection import MongoManager
 from libs.db.repositories.conversations import (
     BaseConversationsRepository,
@@ -43,7 +43,7 @@ class AppModule(Module):
     @singleton
     @provider
     def provide_graph_provider(self, model_factory: ModelFactory) -> BaseGraphProvider:
-        return SupervisorGraphProvider(model_factory)
+        return DeepAgentProvider(model_factory)
 
     @singleton
     @provider

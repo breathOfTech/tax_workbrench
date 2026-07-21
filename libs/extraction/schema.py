@@ -227,6 +227,27 @@ ExtractedFact = Annotated[
 ]
 
 
+class FactAction(BaseModel):
+    """An extracted fact paired with its reconciliation action."""
+
+    fact: ExtractedFact
+    action: Literal["create", "update", "replace"] = Field(
+        description=(
+            "create: brand new fact not seen before. "
+            "update: refines/adds fields to an existing fact (same entity). "
+            "replace: contradicts an existing fact — old one should be marked replaced."
+        ),
+    )
+    matched_fact_id: str | None = Field(
+        default=None,
+        description="ID of the existing fact being updated or replaced. Required for update/replace actions.",
+    )
+    reason: str = Field(
+        default="",
+        description="Why this action was chosen (e.g., 'User corrected salary from $185k to $190k').",
+    )
+
+
 class ExtractionResult(BaseModel):
     """Result of fact extraction from a conversation turn.
 
@@ -234,9 +255,9 @@ class ExtractionResult(BaseModel):
     the list is empty.
     """
 
-    facts: list[ExtractedFact] = Field(
+    facts: list[FactAction] = Field(
         default_factory=list,
-        description="Tax facts extracted from the user's message. Empty if no facts found.",
+        description="Tax facts extracted from the user's message with reconciliation actions. Empty if no facts found.",
     )
     reasoning: str = Field(
         default="",

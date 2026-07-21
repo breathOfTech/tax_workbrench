@@ -1,5 +1,5 @@
-"""Tax Workbench agents — supervisor and subagents."""
+"""Tax Workbench agents — deep agent with intake and general subagents."""
 
-from agents.supervisor import SupervisorGraphProvider
+from agents.deep_agent import DeepAgentProvider
 
-__all__ = ["SupervisorGraphProvider"]
+__all__ = ["DeepAgentProvider"]
