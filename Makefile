@@ -5,6 +5,10 @@ start:
 	docker compose up -d
 	.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
+# Start chat UI (Chainlit)
+chat:
+	.venv/bin/chainlit run app/chat.py --port 8080
+
 # Start only infrastructure (MongoDB, Redis)
 infra:
 	docker compose up -d

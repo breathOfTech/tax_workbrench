@@ -2,7 +2,7 @@
 name = "tax-workbench"
 version = "0.1.0"
 description = "Agentic tax planning workspace for U.S. individual tax scenarios"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 dependencies = [
     # LangGraph / LangChain
     "langgraph>=0.4",
@@ -27,6 +27,9 @@ dependencies = [
     # Config
     "pyyaml>=6.0",
     "python-dotenv>=1.0",
+
+    # Chat UI
+    "chainlit>=2.0",
 ]
 
 [project.optional-dependencies]
