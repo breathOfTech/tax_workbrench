@@ -7,7 +7,7 @@ dependencies = [
     # LangGraph / LangChain
     "langgraph>=0.4",
     "langchain-core>=0.3",
-    "langchain-anthropic>=0.3",
+    "langchain-aws>=0.2",
 
     # API
     "fastapi>=0.115",

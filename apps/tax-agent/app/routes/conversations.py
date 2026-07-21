@@ -1,15 +1,11 @@
 """Conversation routes."""
 
 from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-from tax_workbench.db.repositories.conversations import BaseConversationsRepository
-from tax_workbench.models.conversation import (
-    Conversation,
-    ConversationMessage,
-    ConversationState,
-    MessageRole,
-)
+from tax_workbench.lib.graph_runtime import BaseConversationService
+from tax_workbench.models.conversation import Conversation
 
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
@@ -23,46 +19,54 @@ class UpdateConversationRequest(BaseModel):
     content: str
 
 
-def _get_repository(request: Request) -> BaseConversationsRepository:
-    """Resolve repository from DI container."""
-    return request.app.state.container.get(BaseConversationsRepository)
+def _get_service(request: Request) -> BaseConversationService:
+    """Resolve conversation service from DI container."""
+    return request.app.state.container.get(BaseConversationService)
 
 
 @router.post("/", response_model=Conversation)
 async def create_conversation(request: Request, body: CreateConversationRequest):
-    """Create a new conversation and kick off graph execution."""
-    repo = _get_repository(request)
-    message = ConversationMessage(role=MessageRole.USER, content=body.content)
-    conversation = Conversation(messages=[message], state=ConversationState.AGENT_EXECUTING)
-    created = await repo.create(conversation)
-
-    # TODO: Trigger supervisor graph execution here
-    # For now, mark as open (no agent wired yet)
-    return await repo.update_state(created.id, ConversationState.OPEN)
+    """Create a new conversation and run the agent."""
+    service = _get_service(request)
+    return await service.create_conversation(body.content)
 
 
 @router.post("/{conversation_id}", response_model=Conversation)
 async def update_conversation(
     request: Request, conversation_id: str, body: UpdateConversationRequest
 ):
-    """Send a follow-up message to an existing conversation."""
-    repo = _get_repository(request)
-    conversation = await repo.find_by_id(conversation_id)
+    """Send a follow-up message (non-streaming)."""
+    service = _get_service(request)
+    try:
+        return await service.send_message(conversation_id, body.content)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+
+@router.post("/{conversation_id}/stream")
+async def stream_conversation(
+    request: Request, conversation_id: str, body: UpdateConversationRequest
+):
+    """Send a message and stream the response via SSE."""
+    service = _get_service(request)
+
+    conversation = await service.get_conversation(conversation_id)
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    message = ConversationMessage(role=MessageRole.USER, content=body.content)
-    updated = await repo.append_message(conversation_id, message)
+    async def event_stream():
+        async for chunk in service.stream_response(conversation_id, body.content):
+            yield f"data: {chunk}\n\n"
+        yield "data: [DONE]\n\n"
 
-    # TODO: Trigger supervisor graph execution here
-    return updated
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @router.get("/{conversation_id}", response_model=Conversation)
 async def get_conversation(request: Request, conversation_id: str):
     """Retrieve a conversation by ID."""
-    repo = _get_repository(request)
-    conversation = await repo.find_by_id(conversation_id)
+    service = _get_service(request)
+    conversation = await service.get_conversation(conversation_id)
     if conversation is None:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return conversation
@@ -71,15 +75,15 @@ async def get_conversation(request: Request, conversation_id: str):
 @router.get("/", response_model=list[Conversation])
 async def list_conversations(request: Request):
     """List all conversations."""
-    repo = _get_repository(request)
-    return await repo.find_all()
+    service = _get_service(request)
+    return await service.list_conversations()
 
 
 @router.delete("/{conversation_id}")
 async def delete_conversation(request: Request, conversation_id: str):
     """Delete a conversation."""
-    repo = _get_repository(request)
-    deleted = await repo.delete(conversation_id)
+    service = _get_service(request)
+    deleted = await service.delete_conversation(conversation_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return {"status": "deleted"}

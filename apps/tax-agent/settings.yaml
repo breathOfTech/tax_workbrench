@@ -9,6 +9,6 @@ mongodb:
 redis:
   url: redis://localhost:6379
 
-anthropic:
-  api_key: ""
-  default_model: claude-sonnet-4-20250514
+llm:
+  region: us-east-1
+  default_model: us.anthropic.claude-sonnet-4-5-20250929-v1:0

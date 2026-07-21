@@ -1,5 +1,6 @@
 """Conversation document model."""
 
+from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
@@ -20,7 +21,7 @@ class ConversationMessage(BaseModel):
     role: MessageRole
     content: str
     metadata: dict[str, Any] = Field(default_factory=dict)
-    timestamp: str = Field(default_factory=lambda: _utcnow().isoformat())
+    timestamp: datetime = Field(default_factory=_utcnow)
 
 
 class ConversationState(StrEnum):

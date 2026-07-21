@@ -28,7 +28,9 @@ class BaseDatabaseService(ABC):
         ...
 
     @abstractmethod
-    async def find(self, query: dict[str, Any]) -> list[dict[str, Any]]:
+    async def find(
+        self, query: dict[str, Any], limit: int = 100, sort_field: str = "created_at"
+    ) -> list[dict[str, Any]]:
         ...
 
     @abstractmethod
@@ -69,14 +71,18 @@ class DatabaseService(BaseDatabaseService):
         """Find a document by its ID."""
         return await self.collection.find_one({"_id": doc_id})
 
-    async def find(self, query: dict[str, Any]) -> list[dict[str, Any]]:
-        """Find documents matching a query."""
-        cursor = self.collection.find(query)
-        return await cursor.to_list(length=None)
+    async def find(
+        self, query: dict[str, Any], limit: int = 100, sort_field: str = "created_at"
+    ) -> list[dict[str, Any]]:
+        """Find documents matching a query, sorted by creation date descending."""
+        cursor = self.collection.find(query).sort(sort_field, -1).limit(limit)
+        return await cursor.to_list(length=limit)
 
     async def update(self, doc_id: str, update: dict[str, Any]) -> dict[str, Any] | None:
         """Update a document. Automatically sets updated_at."""
-        update.setdefault("$set", {})["updated_at"] = datetime.now(timezone.utc)
+        update = {**update}
+        set_fields = {**update.get("$set", {}), "updated_at": datetime.now(timezone.utc)}
+        update["$set"] = set_fields
         result = await self.collection.find_one_and_update(
             {"_id": doc_id},
             update,

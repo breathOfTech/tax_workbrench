@@ -7,6 +7,7 @@ Env vars override YAML values using double-underscore notation:
     SERVER__PORT=... overrides server.port
 """
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -37,8 +38,6 @@ def _apply_env_overrides() -> None:
         MONGODB__URI → settings["mongodb"]["uri"]
         SERVER__PORT → settings["server"]["port"]
     """
-    import os
-
     for key, value in os.environ.items():
         parts = key.lower().split("__")
         if len(parts) >= 2 and parts[0] in _settings:
