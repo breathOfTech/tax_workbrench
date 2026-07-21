@@ -24,6 +24,10 @@ class BaseDatabaseService(ABC):
         ...
 
     @abstractmethod
+    async def create_many(self, documents: list[BaseDocument]) -> list[dict[str, Any]]:
+        ...
+
+    @abstractmethod
     async def find_by_id(self, doc_id: str) -> dict[str, Any] | None:
         ...
 
@@ -66,6 +70,14 @@ class DatabaseService(BaseDatabaseService):
         data = document.to_mongo()
         await self.collection.insert_one(data)
         return data
+
+    async def create_many(self, documents: list[BaseDocument]) -> list[dict[str, Any]]:
+        """Insert multiple documents. Returns the inserted document dicts."""
+        if not documents:
+            return []
+        docs = [doc.to_mongo() for doc in documents]
+        await self.collection.insert_many(docs)
+        return docs
 
     async def find_by_id(self, doc_id: str) -> dict[str, Any] | None:
         """Find a document by its ID."""

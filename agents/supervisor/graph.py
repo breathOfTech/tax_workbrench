@@ -1,5 +1,6 @@
 """Supervisor graph — routes user messages to the appropriate subagent."""
 
+import operator
 from typing import Annotated, Literal
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
@@ -14,8 +15,19 @@ from agents.supervisor.prompt import SUPERVISOR_PROMPT
 from libs.graph_runtime import CachingGraphProvider, ModelFactory, ModelSettings
 
 
+def _normalize_content(content: str | list) -> str:
+    """Normalize message content that may be a list (Bedrock) to a string."""
+    if isinstance(content, list):
+        return "".join(
+            block["text"] if isinstance(block, dict) else str(block)
+            for block in content
+        )
+    return content
+
+
 class SupervisorState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
+    extracted_facts: Annotated[list[dict], operator.add]
 
 
 class SupervisorGraphProvider(CachingGraphProvider):
@@ -35,37 +47,39 @@ class SupervisorGraphProvider(CachingGraphProvider):
         async def route(state: SupervisorState) -> dict:
             """Classify the last user message and decide which agent handles it."""
             last_message = state["messages"][-1]
+            content = _normalize_content(last_message.content)
             response = await router_llm.ainvoke([
                 SystemMessage(content=SUPERVISOR_PROMPT),
-                HumanMessage(content=last_message.content),
+                HumanMessage(content=content),
             ])
-            content = response.content
-            if isinstance(content, list):
-                content = "".join(
-                    block["text"] if isinstance(block, dict) else block
-                    for block in content
-                )
-            decision = content.strip().lower()
-            return {"messages": [], "route": decision}
+            response_content = _normalize_content(response.content)
+            decision = response_content.strip().lower()
+            return {"route": decision}
 
         async def intake_node(state: SupervisorState) -> dict:
-            result = await intake_graph.ainvoke({"messages": state["messages"]})
-            return {"messages": result["messages"][-1:]}
+            result = await intake_graph.ainvoke({
+                "messages": state["messages"],
+                "extracted_facts": [],
+            })
+            return {
+                "messages": result["messages"][-1:],
+                "extracted_facts": result.get("extracted_facts", []),
+            }
 
         async def general_node(state: SupervisorState) -> dict:
             result = await general_graph.ainvoke({"messages": state["messages"]})
             return {"messages": result["messages"][-1:]}
 
-        def pick_agent(state: dict) -> Literal["intake", "general"]:
+        def pick_agent(state: SupervisorState) -> Literal["intake", "general"]:
             decision = state.get("route", "general")
             if "intake" in decision:
                 return "intake"
             return "general"
 
-        # Build the graph with routing state
         class RoutingState(TypedDict):
             messages: Annotated[list[BaseMessage], add_messages]
             route: str
+            extracted_facts: Annotated[list[dict], operator.add]
 
         graph = StateGraph(RoutingState)
         graph.add_node("router", route)

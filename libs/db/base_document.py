@@ -5,7 +5,7 @@ bookkeeping (id, timestamps) without manual wiring.
 """
 
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Self
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -41,8 +41,8 @@ class BaseDocument(BaseModel):
         return data
 
     @classmethod
-    def from_mongo(cls, data: dict[str, Any]) -> "BaseDocument":
-        """Create instance from MongoDB document."""
+    def from_mongo(cls, data: dict[str, Any] | None) -> Self | None:
+        """Create instance from MongoDB document. Returns None if data is None."""
         if data is None:
             return None
         if "_id" in data:
